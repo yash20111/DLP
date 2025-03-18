@@ -1,0 +1,78 @@
+%{
+#include <stdio.h>
+#include <string.h>
+
+char user_input[100];  // Renamed 'input' to 'user_input'
+int pos = 0;  // Renamed 'index' to 'pos' (since 'index' is also a built-in function)
+
+int S();
+int L();
+int L_prime();
+
+void yyerror() {
+    printf("Invalid string\n");
+}
+
+int yywrap(void) { 
+    return 1; 
+}
+
+%}
+
+%%
+
+.|\n { return 0; }  // Match everything
+
+%%
+
+// Function to check 'S' rule
+int S() {
+    if (user_input[pos] == '(') {
+        pos++;
+        if (L()) {
+            if (user_input[pos] == ')') {
+                pos++;
+                return 1;
+            }
+        }
+        return 0;
+    }
+    else if (user_input[pos] == 'a') {
+        pos++;
+        return 1;
+    }
+    return 0;
+}
+
+// Function to check 'L' rule
+int L() {
+    if (S()) {
+        return L_prime();
+    }
+    return 0;
+}
+
+// Function to check 'L_prime' rule
+int L_prime() {
+    if (user_input[pos] == ',') {
+        pos++;
+        if (S()) {
+            return L_prime();
+        }
+        return 0;
+    }
+    return 1; // Epsilon case (empty)
+}
+
+int main() {
+    printf("Enter a string: ");
+    scanf("%s", user_input);
+
+    if (S() && user_input[pos] == '\0') {
+        printf("Valid string\n");
+    } else {
+        yyerror();
+    }
+
+    return 0;
+}
